@@ -1,0 +1,179 @@
+{
+    "Comment": "This is your state machine",
+    "StartAt": "Check Event for Error",
+    "States":
+    {
+        "Check Event for Error":
+        {
+            "Type": "Choice",
+            "Choices":
+            [
+                {
+                    "Not":
+                    {
+                        "Variable": "$.detail.errorCode",
+                        "IsPresent": true
+                    },
+                    "Next": "Get Fields DDB"
+                }
+            ],
+            "Default": "Success"
+        },
+        "Get Fields DDB":
+        {
+            "Type": "Pass",
+            "Next": "DynamoDB PutItem",
+            "Comment": "Filter the elements using json path",
+            "Parameters":
+            {
+                "detail.$": "$.detail",
+                "AvailabilityZone.$": "$.detail.responseElements.containerInstance.attributes[?(@.name=='ecs.availability-zone')].value",
+                "InstanceType.$": "$.detail.responseElements.containerInstance.attributes[?(@.name=='ecs.instance-type')].value",
+                "AmiId.$": "$.detail.responseElements.containerInstance.attributes[?(@.name=='ecs.ami-id')].value",
+                "CPU.$": "$.detail.responseElements.containerInstance.registeredResources[?(@.name=='CPU')].integerValue",
+                "Memory.$": "$.detail.responseElements.containerInstance.registeredResources[?(@.name=='MEMORY')].integerValue"
+            }
+        },
+        "DynamoDB PutItem":
+        {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:putItem",
+            "Parameters":
+            {
+                "TableName": "${ECSRegistrationTable}",
+                "Item":
+                {
+                    "containerInstanceArn":
+                    {
+                        "S.$": "$.detail.responseElements.containerInstance.containerInstanceArn"
+                    },
+                    "InstanceId":
+                    {
+                        "S.$": "$.detail.responseElements.containerInstance.ec2InstanceId"
+                    },
+                    "LastEventTime":
+                    {
+                        "S.$": "$.detail.eventTime"
+                    },
+                    "LastEventType":
+                    {
+                        "S.$": "$.detail.eventName"
+                    },
+                    "ECSCluster":
+                    {
+                        "S.$": "$.detail.requestParameters.cluster"
+                    },
+                    "AvailabilityZone":
+                    {
+                        "S.$": "$.AvailabilityZone[0]"
+                    },
+                    "InstanceType":
+                    {
+                        "S.$": "$.InstanceType[0]"
+                    },
+                    "AmiId":
+                    {
+                        "S.$": "$.AmiId[0]"
+                    },
+                    "CPU":
+                    {
+                        "N.$": "States.Format('{}',$.CPU[0])"
+                    },
+                    "Memory":
+                    {
+                        "N.$": "States.Format('{}',$.Memory[0])"
+                    },
+                    "Events":
+                    {
+                        "L":
+                        [
+                            {
+                                "M":
+                                {
+                                    "EventType":
+                                    {
+                                        "S.$": "$.detail.eventName"
+                                    },
+                                    "EventTime":
+                                    {
+                                        "S.$": "$.detail.eventTime"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "Next": "DescribeInstances"
+        },
+        "DescribeInstances":
+        {
+            "Type": "Task",
+            "InputPath": "$$.Execution.Input",
+            "Parameters":
+            {
+                "InstanceIds.$": "States.Array($.detail.responseElements.containerInstance.ec2InstanceId)"
+            },
+            "Resource": "arn:aws:states:::aws-sdk:ec2:describeInstances",
+            "Next": "Check if Instance Life Cycle exist"
+        },
+        "Check if Instance Life Cycle exist": {
+            "Type": "Choice",
+            "Choices": [{
+                "Variable": "$.Reservations[0].Instances[0].InstanceLifecycle",
+                "IsPresent": true,
+                "Next": "Set Purchase to Spot"
+            }],
+            "Default": "Set Purchase to On-Demand"
+        },
+        "Set Purchase to Spot":
+        {
+            "Type": "Pass",
+            "Next": "DynamoDB UpdateItem",
+            "Comment": "Set Purchase to Spot",
+            "Parameters":
+            {
+                "purchase": "spot"
+            }
+        },
+        "Set Purchase to On-Demand":
+        {
+            "Type": "Pass",
+            "Next": "DynamoDB UpdateItem",
+            "Comment": "Set Purchase to on-demand",
+            "Parameters":
+            {
+                "purchase": "on-demand"
+            }
+        },
+        "DynamoDB UpdateItem":
+        {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:updateItem",
+            "Parameters":
+            {
+                "TableName": "${ECSRegistrationTable}",
+                "Key":
+                {
+                    "containerInstanceArn":
+                    {
+                        "S.$": "$$.Execution.Input.detail.responseElements.containerInstance.containerInstanceArn"
+                    }
+                },
+                "UpdateExpression": "SET PurchaseOption = :myValueRef",
+                "ExpressionAttributeValues":
+                {
+                    ":myValueRef":
+                    {
+                        "S.$": "$.purchase"
+                    }
+                }
+            },
+            "Next": "Success"
+        },
+        "Success":
+        {
+            "Type": "Succeed"
+        }
+    }
+}

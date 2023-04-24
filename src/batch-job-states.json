@@ -1,0 +1,258 @@
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "Pass",
+    "States":
+    {
+        "Pass":
+        {
+            "Type": "Pass",
+            "Parameters":
+            {
+                "JobName.$": "$.detail.jobName",
+                "JobId.$": "$.detail.jobId",
+                "JobQueue.$": "$.detail.jobQueue",
+                "Region.$": "$.region",
+                "JobDefinition.$": "$.detail.jobDefinition",
+                "LastEventType.$": "$.detail.status",
+                "LastEventTime.$": "$.time",
+                "Detail.$": "$.detail"
+            },
+            "Next": "Choice"
+        },
+        "Choice":
+        {
+            "Type": "Choice",
+            "Choices":
+            [
+                {
+                    "Or":
+                    [
+                        {
+                            "Variable": "$.LastEventType",
+                            "StringMatches": "SUCCEEDED"
+                        },
+                        {
+                            "Or":
+                            [
+                                {
+                                    "And":
+                                    [
+                                        {
+                                            "Variable": "$.LastEventType",
+                                            "StringMatches": "FAILED"
+                                        },
+                                        {
+                                            "Variable": "$.Detail.container.taskArn",
+                                            "IsPresent": true
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Next": "DynamoDB Update Job"
+                },
+                {
+                    "Variable": "$.LastEventType",
+                    "StringMatches": "RUNNING",
+                    "Next": "ChoicePlatform"
+                }
+            ],
+            "Default": "Success"
+        },
+        "ChoicePlatform":
+        {
+            "Type": "Choice",
+            "Choices":
+            [
+                {
+                    "Variable": "$.Detail.platformCapabilities[0]",
+                    "StringMatches": "EC2",
+                    "Next": "DynamoDB GetItem Instance Arn"
+                },
+                {
+                    "Variable": "$.Detail.platformCapabilities[0]",
+                    "StringMatches": "FARGATE",
+                    "Next": "DynamoDB PutItem FARGATE"
+                }
+            ],
+            "Default": "Success"
+        },
+        "DynamoDB GetItem Instance Arn":
+        {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:getItem",
+            "Parameters":
+            {
+                "TableName": "${ECSRegistrationTable}",
+                "Key":
+                {
+                    "containerInstanceArn":
+                    {
+                        "S.$": "$.Detail.container.containerInstanceArn"
+                    }
+                }
+            },
+            "Next": "DynamoDB PutItem EC2"
+        },
+        "DynamoDB PutItem EC2":
+        {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:putItem",
+            "Parameters":
+            {
+                "TableName": "${BatchJobData}",
+                "Item":
+                {
+                    "taskArn":
+                    {
+                        "S.$": "$$.Execution.Input.detail.container.taskArn"
+                    },
+                    "jobName":
+                    {
+                        "S.$": "$$.Execution.Input.detail.jobName"
+                    },
+                    "jobId":
+                    {
+                        "S.$": "$$.Execution.Input.detail.jobId"
+                    },
+                    "startedAt":
+                    {
+                        "N.$": "States.Format('{}',$$.Execution.Input.detail.startedAt)"
+                    },
+                    "jobStatus":
+                    {
+                        "S.$": "$$.Execution.Input.detail.status"
+                    },
+                    "jobQueue":
+                    {
+                        "S.$": "$$.Execution.Input.detail.jobQueue"
+                    },
+                    "vCPUs":
+                    {
+                        "N.$": "$$.Execution.Input.detail.container.resourceRequirements[0].value"
+                    },
+                    "memory":
+                    {
+                        "N.$": "$$.Execution.Input.detail.container.resourceRequirements[1].value"
+                    },
+                    "containerInstanceArn":
+                    {
+                        "S.$": "$$.Execution.Input.detail.container.containerInstanceArn"
+                    },
+                    "purchaseOption":
+                    {
+                        "S.$": "$.Item.PurchaseOption.S"
+                    },
+                    "instanceType":
+                    {
+                        "S.$": "$.Item.InstanceType.S"
+                    },
+                    "availabilityZone":
+                    {
+                        "S.$": "$.Item.AvailabilityZone.S"
+                    },
+                    "instanceId":
+                    {
+                        "S.$": "$.Item.InstanceId.S"
+                    },
+                    "platform":
+                    {
+                        "S.$": "$$.Execution.Input.detail.platformCapabilities[0]"
+                    },
+                    "logStream":
+                    {
+                        "S.$": "$$.Execution.Input.detail.container.logStreamName"
+                    }
+                }
+            },
+            "Next": "Success"
+        },
+        "DynamoDB PutItem FARGATE":
+        {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:putItem",
+            "Parameters":
+            {
+                "TableName": "${BatchJobData}",
+                "Item":
+                {
+                    "taskArn":
+                    {
+                        "S.$": "$$.Execution.Input.detail.container.taskArn"
+                    },
+                    "jobName":
+                    {
+                        "S.$": "$$.Execution.Input.detail.jobName"
+                    },
+                    "jobId":
+                    {
+                        "S.$": "$$.Execution.Input.detail.jobId"
+                    },
+                    "startedAt":
+                    {
+                        "S.$": "States.Format('{}',$$.Execution.Input.detail.startedAt)"
+                    },
+                    "jobStatus":
+                    {
+                        "S.$": "$$.Execution.Input.detail.status"
+                    },
+                    "jobQueue":
+                    {
+                        "S.$": "$$.Execution.Input.detail.jobQueue"
+                    },
+                    "vCPUs":
+                    {
+                        "N.$": "$$.Execution.Input.detail.container.resourceRequirements[0].value"
+                    },
+                    "memory":
+                    {
+                        "N.$": "$$.Execution.Input.detail.container.resourceRequirements[1].value"
+                    },
+                    "platform":
+                    {
+                        "S.$": "$$.Execution.Input.detail.platformCapabilities[0]"
+                    },
+                    "logStream":
+                    {
+                        "S.$": "$$.Execution.Input.detail.container.logStreamName"
+                    }
+                }
+            },
+            "Next": "Success"
+        },
+        "DynamoDB Update Job":
+        {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:updateItem",
+            "Parameters":
+            {
+                "TableName": "${BatchJobData}",
+                "Key":
+                {
+                    "jobId":
+                    {
+                        "S.$": "$.Detail.jobId"
+                    }
+                },
+                "UpdateExpression": "SET stoppedAt = :myValueRef, jobStatus=:jobStatus",
+                "ExpressionAttributeValues":
+                {
+                    ":myValueRef":
+                    {
+                         "S.$": "States.Format('{}',$.Detail.stoppedAt)"
+                    },
+                    ":jobStatus":
+                    {
+                        "S.$": "$.LastEventType"
+                    }
+                }
+            },
+            "Next": "Success"
+        },
+        "Success":
+        {
+            "Type": "Succeed"
+        }
+    }
+}

@@ -1,0 +1,332 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  aws-batch-job
+
+  Sample SAM Template for aws-batch-job
+
+Resources:
+  BatchJobData:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: jobId
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      ContributorInsightsSpecification:
+        Enabled: false
+      KeySchema:
+        - AttributeName: jobId
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+         PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      TableClass: STANDARD
+      Tags:
+      - Key: "Application"
+        Value: "BatchOperationalDashboard"
+      TimeToLiveSpecification:
+        AttributeName: ExpirationTime
+        Enabled: true
+
+  BatchJobStateChangeLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+       RetentionInDays: 7
+
+  BatchJobStateChange:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionSubstitutions:
+        BatchJobData: !Ref BatchJobData
+        ECSRegistrationTable: !Ref ECSInstanceRegistrationTable
+      DefinitionUri: src/batch-job-states.json
+      Events:
+        CloudTrail:
+          Type: CloudWatchEvent
+          Description: "Capture AWS Batch jobs states transitions"
+          Properties:
+            Pattern:
+              detail-type:
+              - 'Batch Job State Change'
+              source:
+              - 'aws.batch'
+      Logging:
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt BatchJobStateChangeLogGroup.Arn
+        Level: 'ALL'
+      Policies:
+        - CloudWatchLogsFullAccess
+        - DynamoDBWritePolicy:
+            TableName: !Ref BatchJobData
+        - DynamoDBReadPolicy:
+            TableName: !Ref ECSInstanceRegistrationTable
+      Tags:
+        "Application": "BatchOperationalDashboard"
+      Tracing:
+        Enabled: true
+      Type: EXPRESS
+
+### ECS Instance Registration
+  ECSInstanceRegistrationTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: containerInstanceArn
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      ContributorInsightsSpecification:
+        Enabled: false
+      KeySchema:
+        - AttributeName: containerInstanceArn
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+         PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      TableClass: STANDARD
+      Tags:
+      - Key: "Application"
+        Value: "BatchOperationalDashboard"
+      TimeToLiveSpecification:
+        AttributeName: ExpirationTime
+        Enabled: true
+
+  ECSInstanceRegistrationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+       RetentionInDays: 7
+
+
+  ECSInstanceRegistrationStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionSubstitutions:
+        ECSRegistrationTable: !Ref ECSInstanceRegistrationTable
+      DefinitionUri: src/ecs-instance-registration.json
+      Events:
+        CloudTrail:
+          Type: CloudWatchEvent
+          Description: "Capture ECS instances registration and deregistration"
+          Properties:
+            Pattern:
+              detail-type:
+              - 'AWS API Call via CloudTrail'
+              source:
+              - 'aws.ecs'
+              detail:
+                eventName:
+                - 'RegisterContainerInstance'
+                - 'DeregisterContainerInstance'
+                eventSource:
+                - 'ecs.amazonaws.com'
+      Logging:
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt ECSInstanceRegistrationLogGroup.Arn
+        Level: 'ALL'
+      Policies:
+        - CloudWatchLogsFullAccess
+        - DynamoDBWritePolicy:
+            TableName: !Ref ECSInstanceRegistrationTable
+        - EC2DescribePolicy: {}
+      Tags:
+        "Application": "BatchOperationalDashboard"
+      Tracing:
+        Enabled: true
+      Type: EXPRESS
+
+  AthenaSpillS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'AES256'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      Tags:
+        - Key: "Application"
+          Value: "BatchOperationalDashboard"
+
+  AthenaSpillS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AthenaSpillS3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:*'
+            Effect: Deny
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref AthenaSpillS3Bucket
+                  - /*
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref AthenaSpillS3Bucket
+            Principal: '*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': False
+
+  AthenaDynamoDBConnector:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:292517598671:applications/AthenaDynamoDBConnector
+        SemanticVersion: 2023.15.1
+      Parameters:
+        AthenaCatalogName: aws-batch-jobs-data
+        # WARNING: If set to 'true' encryption for spilled data is disabled.
+        # DisableSpillEncryption: 'false' # Uncomment to override default value
+        # Lambda memory in MB (min 128 - 3008 max).
+        # LambdaMemory: '3008' # Uncomment to override default value
+        # Maximum Lambda invocation runtime in seconds. (min 1 - 900 max)
+        # LambdaTimeout: '900' # Uncomment to override default value
+        # The name of the bucket where this function can spill data.
+        SpillBucket: !Ref AthenaSpillS3Bucket
+        # The prefix within SpillBucket where this function can spill data.
+        # SpillPrefix: 'athena-spill' # Uncomment to override default value
+
+  BatchDataCatalog:
+    DependsOn: AthenaDynamoDBConnector
+    Type: AWS::Athena::DataCatalog
+    Properties:
+      Name: aws-batch-jobs-data
+      Parameters:
+        function: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:aws-batch-jobs-data'
+      Tags:
+        - Key: "Application"
+          Value: "BatchOperationalDashboard"
+      Type: LAMBDA
+
+  GrafanaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: 'batch-wg'
+      RecursiveDeleteOption: true
+      State: ENABLED
+      Tags:
+        - Key: "Application"
+          Value: "BatchOperationalDashboard"
+      WorkGroupConfiguration:
+        BytesScannedCutoffPerQuery: 1000000000
+        EnforceWorkGroupConfiguration: false
+        PublishCloudWatchMetricsEnabled: false
+        RequesterPaysEnabled: false
+
+  GrafanaAthenaAccess:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: 'GrafanaAthenaAccess'
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action:
+              - athena:GetDatabase
+              - athena:GetDataCatalog
+              - athena:GetTableMetadata
+              - athena:ListDatabases
+              - athena:ListDataCatalogs
+              - athena:ListTableMetadata
+              - athena:ListWorkGroups
+            Resource:
+              - '*'
+          - Effect: Allow
+            Action:
+              - athena:GetQueryExecution
+              - athena:GetQueryResults
+              - athena:GetWorkGroup
+              - athena:StartQueryExecution
+              - athena:StopQueryExecution
+            Resource:
+              - !Join [ '', ['arn:aws:athena:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':workgroup/', !Ref GrafanaWorkGroup ]]
+          - Effect: Allow
+            Action:
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:ListBucketMultipartUploads
+              - s3:ListMultipartUploadParts
+              - s3:AbortMultipartUpload
+              - s3:PutObject
+              - s3:PutBucketPublicAccessBlock
+            Resource:
+              - !GetAtt AthenaSpillS3Bucket.Arn
+              - !Join [ '', [ !GetAtt AthenaSpillS3Bucket.Arn, '/*' ]]
+          - Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+            Resource:
+              - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:aws-batch-jobs-data'
+      Roles:
+        - !Ref GrafanaRole
+
+  GrafanaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - grafana.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonGrafanaCloudWatchAccess
+
+  GrafanaBatch:
+    Type: AWS::Grafana::Workspace
+    Properties: 
+      AccountAccessType: CURRENT_ACCOUNT
+      AuthenticationProviders: 
+        - AWS_SSO
+      DataSources: 
+        - ATHENA
+        - CLOUDWATCH
+      Name: "aws-batch-operation-dashboard"
+      RoleArn: !Ref GrafanaRole
+      PermissionType: SERVICE_MANAGED
+
+Outputs:
+  AthenaDataSource:
+    Value: !Ref BatchJobData
+
+  AthenaSpillBucket:
+    Value: !Ref AthenaSpillS3Bucket
+
+  GrafanaWorkspaceId:
+    Value: !Ref GrafanaBatch
