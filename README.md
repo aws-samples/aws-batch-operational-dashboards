@@ -3,7 +3,7 @@
 **AWS Batch Operational Dashboard** provides a code sample to deploy a solution to show Amazon EC2 resources and Container resource usage by AWS Batch jobs.
 
 This solution relies on a serverless architecture to create a Grafana dashboard to visualize compute and memory resources usage by AWS Batch jobs.
-It provides better insights at the jobs level on how Amazon EC2 resurces are used.
+It provides better insights at the jobs level on how Amazon EC2 resources are used.
 
 This application is designed to be scalable by collecting data from events and API calls using Amazon EventBrige and does not make API calls to describe your resources. Data collected through events and API are partially aggregated to DynamoDB to recoup information and generate Amazon CloudWatch metrics with the Embedded Metric Format. The application also deploys a several of dashboards displaying the job states, Amazon EC2 instances belonging your Amazon ECS Clusters (AWS Batch Compute Environments), ASGs across Availability Zones.
 
@@ -11,9 +11,16 @@ This application is designed to be scalable by collecting data from events and A
 
 Install AWS Serverless Application Model Command Line Interface (AWS SAM CLI) by following the [instructions](<https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html>)
 
+## Dashboard
+
+The dashboard allows to visualize AWS Batch jobs status, start and stop time, job queue, instance type, instance id, availability zone, Amazon Cloudwatch logs associated with the job.
+In addition, you can navigate through time and focus on a specific AWS Batch job to observe the Amazon EC2 CPU and Memory usage, the container CPU and memory requested and used as well as the EBS operations that are related to the job.
+
+<img alt="Grafana AWS Batch Dashboard" src="docs/images/grafana-batch-dashboard.png"  width="100%" height="70%"> <br />
+
 ## Architecture
 
-The arhcitecture trask AWS Batch job events through Amazon EventBrige that are routed to a step function that store the AWS job states, availability zones, instance type, instance id, instance pricing model, log stream in a DynamoDB database.
+The architecture track AWS Batch job events through Amazon EventBrige that are routed to a step function that store the AWS job states, availability zones, instance type, instance id, instance pricing model, log stream in a DynamoDB database.
 You can visualize the the results using Amazon Managed Grafana through Amazon Athena.
 
 ![Operational Dashboard Architecture](<docs/images/batch-operational-dashboard-architecture.png>)
@@ -115,7 +122,7 @@ aws grafana update-permissions --workspace-id ${GRAFANA_ID} \
     action=ADD,role=VIEWER,users=[{$VIEWER_GROUP,type=SSO_GROUP}]
 ```
 
-Now let's get the url to access the dashboard.
+Now let's get the URL to access the dashboard.
 
 ```bash
 aws grafana describe-workspace --workspace-id ${GRAFANA_ID} \
@@ -123,7 +130,7 @@ aws grafana describe-workspace --workspace-id ${GRAFANA_ID} \
     --output text
 ```
 
-You should get an url that you will paste in your webbrowser, like **g-1234567890.grafana-workspace.us-east-1.amazonaws.com**.
+You should get an URL that you will paste in your web browser, like **g-1234567890.grafana-workspace.us-east-1.amazonaws.com**.
 
 You will be prompted to login with the credentials **user-name** created earlier.
 At user creation, each user will receive an initial password in their emails.
@@ -147,7 +154,7 @@ Once connected as administrator, you will start by settings data sources.
 
 #### 2. Add Amazon Athena Data source
 
-Before starting, you will retrieve the s3 bucket name created to store the AWS Batch jobs data through Amazon Athena.
+Before starting, you will retrieve the S3 bucket name created to store the AWS Batch jobs data through Amazon Athena.
 
 In a terminal:
 
