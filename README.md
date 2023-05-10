@@ -9,7 +9,7 @@ This application is designed to be scalable by collecting data from events and A
 
 ## Prerequisites
 
-Install AWS Serverless Application Model Command Line Interface (AWS SAM CLI) by following the [instructions](<https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html>)
+Install AWS Serverless Application Model Command Line Interface (AWS SAM CLI) version **>=1.72.0** by following the [instructions](<https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html>)
 
 ## Dashboard
 
