@@ -310,6 +310,8 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonGrafanaCloudWatchAccess
+        - arn:aws:iam::aws:policy/service-role/AmazonGrafanaAthenaAccess
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
 
   GrafanaBatch:
     Type: AWS::Grafana::Workspace
