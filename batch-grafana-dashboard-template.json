@@ -569,13 +569,9 @@
           "expression": "fields @timestamp, TaskId, MemoryReserved, MemoryUtilized\n| filter @logStream like /AgentTelemetry-/\n| filter TaskId=\"$TaskId\"\n| sort @timestamp desc",
           "id": "",
           "logGroupNames": [
-            "/aws/ecs/containerinsights/AWSBatch-OD-fb6fe81d-5588-3132-851c-4c2493d2c4c0/performance",
-            "/aws/ecs/containerinsights/AWSBatch-ce-detailed-ef5dadad-5065-30f2-9947-08899a6ecf63/performance",
-            "/aws/ecs/containerinsights/AWSBatch-ce-fargate-71045cf5-b5ec-3ec7-abf0-65b79d8b86e4/performance",
-            "/aws/ecs/containerinsights/AWSBatch-ce-new-93a267b3-f0f3-3a00-945d-c0f1ab7621bd/performance",
-            "/aws/ecs/containerinsights/AWSBatch-ce-spot-eab2f854-9441-3154-b7c7-50f12a0913c9/performance",
-            "/aws/ecs/containerinsights/AWSBatch-ce-tag-2b6ae31b-3252-368f-beea-6801f0513c49/performance",
-            "/aws/ecs/containerinsights/AWSBatch-ht-8fb3d590-c488-303b-8f51-d044f5ddc237/performance"
+            {%- for log in LOG_GROUP %}
+            "{{log}}"{{ ", " if not loop.last else "" }}
+            {%- endfor %}
           ],
           "namespace": "",
           "queryMode": "Logs",
