@@ -243,6 +243,8 @@ You will be able to see the data associated with it in the dashboard.
 #### 5. Create AWS Batch compute cost dashboard
 
 Similar to step 3, you will import an template dashboard in Amazon Managed Grafana for AWS Batch that covers Amazon EC2 compute cost.
+You can see an example below.
+<img alt="Grafana AWS Batch Dashboard" src="docs/images/grafana-batch-cost-dashboard.png"  width="100%" height="70%"> <br />
 
 To import the dashboard in Amazon Managed Grafana:
 1. Select the **squares** on the side menu.<br/>
