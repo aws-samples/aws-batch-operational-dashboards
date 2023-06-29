@@ -288,6 +288,8 @@ Resources:
             Resource:
               - !GetAtt AthenaSpillS3Bucket.Arn
               - !Join [ '', [ !GetAtt AthenaSpillS3Bucket.Arn, '/*' ]]
+              - !GetAtt BucketCURBatchReport
+              - !Join [ '', [ !GetAtt BucketCURBatchReport.Arn, '/*' ]]
           - Effect: Allow
             Action:
               - lambda:InvokeFunction
@@ -311,7 +313,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonGrafanaCloudWatchAccess
         - arn:aws:iam::aws:policy/service-role/AmazonGrafanaAthenaAccess
-        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
 
   GrafanaBatch:
     Type: AWS::Grafana::Workspace
