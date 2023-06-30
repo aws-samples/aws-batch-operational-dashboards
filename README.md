@@ -27,7 +27,25 @@ You can visualize the the results using Amazon Managed Grafana through Amazon At
 
 ## Deployment
 
-The deployment of the dashboard is composed of three steps.
+The deployment of the dashboard is composed of four steps.
+
+### AWS Organization and AWS IAM Identity Center
+
+Amazon Managed Grafana relies on single sign-on using your organization’s identity provider to authenticate users.
+The following steps guide you to setup [AWS Organization](https://aws.amazon.com/organizations/), and [AWS IAM Identity Center](https://aws.amazon.com/iam/identity-center/).
+
+**NOTE**: If you already have AWS Organization and AWS IAM Identity Center you can skip those steps.
+
+#### 1. Create an AWS Organizations
+
+1. Open [AWS Organization](<https://console.aws.amazon.com/organizations/v2>).
+1. Choose **Create an Organization**. By default, the organization is created with all features enabled.
+1. The organization is created and the AWS accounts page appears. The only account present is your management account, and it's currently under the root organizational unit (OU).
+
+#### 2. Enable AWS IAM Identity Center
+
+1. Open [AWS IAM Identity Center](<https://console.aws.amazon.com/singlesignon>).
+1. Choose **Enable**.
 
 ### Deploy the architecture
 
@@ -53,8 +71,9 @@ GRAFANA_ID=`sam list stack-outputs --stack-name ${BATCH_DASHBOARD_NAME} \
 
 ### Create and add group permissions to grafana
 
-Amazon Managed Grafana relies on  to authenticate users.
-The following steps guide you to setup AWS Organization, AWS IAM Identity Center and create a viewer and admin group.
+Amazon Managed Grafana integrates with AWS IAM Identity Center to provide identity federation.
+The federation provides users and groups that will grant access to Amazon Managed Grafana as a **Viewer**, **Editor** or **Admin**.
+The following steps guide you to create a viewer and admin group.
 
 #### 1. Create an AWS Organizations
 
@@ -64,19 +83,20 @@ The following steps guide you to setup AWS Organization, AWS IAM Identity Center
 
 #### 2. Enable AWS IAM Identity Center
 
-1. Open [AWS IAM Identity Center](<https://console.aws.amazon.com/singlesignon>).
-1. Choose **Enable**.
-1. Choose **Go to settings**.
+1. Open **[AWS IAM Identity Center settings](https://console.aws.amazon.com/singlesignon/identity/home#!/settings)**
 1. Copy the **Identity store ID** from the identity store tab. This will be used in the next step
 
 ### Create groups and users in IAM Identity Center
 
-Create grafana admin and viewer groups.
 Set the identity store ID to the value copied in the previous step.
 
 ```bash
 IDENTITY_STORE="d-1234567890"
+```
 
+Create grafana admin and viewer groups.
+
+```bash
 ADMIN_GROUP=`aws identitystore create-group --identity-store-id ${IDENTITY_STORE} \
     --display-name 'grafana-batch-op-dashboard-admin'\
     --query GroupId \
