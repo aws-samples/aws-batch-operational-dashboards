@@ -317,6 +317,7 @@ Resources:
       DataSources: 
         - ATHENA
         - CLOUDWATCH
+      GrafanaVersion: "8.4"
       Name: "aws-batch-operation-dashboard"
       RoleArn: !Ref GrafanaRole
       PermissionType: SERVICE_MANAGED
