@@ -115,11 +115,11 @@ First, you will add the groups created previously to the grafana dashboard.
 ```bash
 aws grafana update-permissions --workspace-id ${GRAFANA_ID} \
     --update-instruction-batch \
-    action=ADD,role=ADMIN,users=[{$ADMIN_GROUP,type=SSO_GROUP}]
+    "action=ADD,role=ADMIN,users=[{id=$ADMIN_GROUP,type=SSO_GROUP}]"
 
 aws grafana update-permissions --workspace-id ${GRAFANA_ID} \
     --update-instruction-batch \
-    action=ADD,role=VIEWER,users=[{$VIEWER_GROUP,type=SSO_GROUP}]
+    "action=ADD,role=VIEWER,users=[{id=$VIEWER_GROUP,type=SSO_GROUP}]"
 ```
 
 Now let's get the URL to access the dashboard.
