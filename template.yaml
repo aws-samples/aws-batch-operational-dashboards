@@ -285,7 +285,7 @@ Resources:
             Resource:
               - !GetAtt AthenaSpillS3Bucket.Arn
               - !Join [ '', [ !GetAtt AthenaSpillS3Bucket.Arn, '/*' ]]
-              - !GetAtt BucketCURBatchReport
+              - !GetAtt BucketCURBatchReport.Arn
               - !Join [ '', [ !GetAtt BucketCURBatchReport.Arn, '/*' ]]
           - Effect: Allow
             Action:
