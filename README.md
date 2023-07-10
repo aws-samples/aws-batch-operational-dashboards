@@ -75,18 +75,12 @@ Amazon Managed Grafana integrates with AWS IAM Identity Center to provide identi
 The federation provides users and groups that will grant access to Amazon Managed Grafana as a **Viewer**, **Editor** or **Admin**.
 The following steps guide you to create a viewer and admin group.
 
-#### 1. Create an AWS Organizations
-
-1. Open [AWS Organization](<https://console.aws.amazon.com/organizations/v2>).
-1. Choose **Create an Organization**. By default, the organization is created with all features enabled.
-1. The organization is created and the AWS accounts page appears. The only account present is your management account, and it's currently under the root organizational unit (OU).
-
-#### 2. Enable AWS IAM Identity Center
+#### 1. Retrieve Identity store ID.
 
 1. Open **[AWS IAM Identity Center settings](https://console.aws.amazon.com/singlesignon/identity/home#!/settings)**
 1. Copy the **Identity store ID** from the identity store tab. This will be used in the next step
 
-### Create groups and users in IAM Identity Center
+#### 2. Create groups and users in IAM Identity Center
 
 Set the identity store ID to the value copied in the previous step.
 
