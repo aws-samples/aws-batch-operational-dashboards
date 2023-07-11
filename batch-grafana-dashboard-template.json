@@ -360,7 +360,7 @@
           },
           "format": 1,
           "hide": false,
-          "rawSQL": "SELECT jobId, jobName, jobStatus, startedAt, stoppedAt, jobQueue, vCPUs, Memory, instancetype, instanceId, platform, purchaseOption, logStream, taskArn FROM \"$__table\" WHERE startedAt > $__from AND cast(stoppedAt as decimal(38,9)) < $__to AND REGEXP_LIKE(instanceId,'${instanceid:raw}') AND REGEXP_LIKE(taskArn,$TaskId) AND REGEXP_LIKE(jobQueue,$JobQueue);",
+          "rawSQL": "SELECT jobId, jobName, jobStatus, startedAt, stoppedAt, jobQueue, vCPUs, Memory, instancetype, instanceId, platform, purchaseOption, logStream, taskArn FROM \"$__table\" WHERE startedAt > $__from AND (cast(stoppedAt as decimal(38,9)) < $__to OR stoppedAt is NULL)  AND REGEXP_LIKE(instanceId,'${instanceid:raw}') AND REGEXP_LIKE(taskArn,$TaskId) AND REGEXP_LIKE(jobQueue,$JobQueue);",
           "refId": "A",
           "table": "{{ TABLE }}"
         }
