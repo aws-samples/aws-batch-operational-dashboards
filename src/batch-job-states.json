@@ -66,17 +66,21 @@
             "Choices":
             [
                 {
-                    "Variable": "$.Detail.platformCapabilities[0]",
-                    "StringMatches": "EC2",
-                    "Next": "DynamoDB GetItem Instance Arn"
-                },
-                {
-                    "Variable": "$.Detail.platformCapabilities[0]",
-                    "StringMatches": "FARGATE",
+                    "And":
+                    [
+                        {
+                            "Variable": "$.Detail.platformCapabilities[0]",
+                            "IsPresent": true
+                        },
+                        {
+                            "Variable": "$.Detail.platformCapabilities[0]",
+                            "StringMatches": "FARGATE"
+                        }
+                    ],
                     "Next": "DynamoDB PutItem FARGATE"
                 }
             ],
-            "Default": "Success"
+            "Default": "DynamoDB GetItem Instance Arn"
         },
         "DynamoDB GetItem Instance Arn":
         {
@@ -158,7 +162,7 @@
                     },
                     "platform":
                     {
-                        "S.$": "$$.Execution.Input.detail.platformCapabilities[0]"
+                        "S": "EC2"
                     },
                     "logStream":
                     {
