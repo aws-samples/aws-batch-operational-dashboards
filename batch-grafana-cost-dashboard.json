@@ -411,7 +411,7 @@
           "hide": false,
           "rawSQL": "SELECT jobId, jobName, jobStatus, taskArn FROM \"$__table\";",
           "refId": "A",
-          "table": "batch-op-dashboard-batchjobdata-1ea6lpbicv0jr"
+          "table": "{{ TABLE }}"
         },
         {
           "connectionArgs": {
