@@ -157,11 +157,12 @@ Once connected as administrator, you will start by settings data sources.
 
 #### 1. Add Amazon CloudWatch Data source
 
-1. Select the **wheel** on the side menu.<br/>
-   ![Grafana Data sources](<docs/images/grafana-data-sources.png>)
+1. Select the **hamburger** menu on the left pane.<br/>
+1. Expand **Administration**<br/>
+   <img alt="Grafana Data sources" src="docs/images/grafana-data-sources.png"  width="30%" height="30%"> <br />
 1. Choose **Data sources**.
-1. Choose **Add data source**.
-1. Choose **CloudWatch**. <br />
+1. Choose **Add new data source**.
+1. Select **CloudWatch**. <br />
    <img alt="Grafana coudwatch" src="docs/images/grafana-cloudwatch.png"  width="50%" height="50%"> <br />
 1. On the **Default Region** menu, choose your **AWS Region**.
 1. Choose **Save & test**.
@@ -182,10 +183,11 @@ Copy the output that you will use in the setup of Amazon Athena data source in A
 
 In the Amazon Managed Grafana dashboard:
 
-1. Select the **wheel** on the side menu.<br/>
-   ![Grafana Data sources](<docs/images/grafana-data-sources.png>)
+1. Select the **hamburger** menu on the left pane.<br/>
+1. Expand **Administration**<br/>
+   <img alt="Grafana Data sources" src="docs/images/grafana-data-sources.png"  width="30%" height="30%"> <br />
 1. Choose **Data sources**.
-1. Choose **Add data source**.
+1. Choose **Add new data source**.
 1. Choose **Amazon Athena**.<br />
    <img alt="Grafana athena" src="docs/images/grafana-athena.png"  width="50%" height="50%"> <br />
 1. On the **Default Region** menu, choose your **AWS Region**.
@@ -213,10 +215,13 @@ python3 ./generate-grafana-dashboard.py --table ${TABLE}
 ```
 
 Once you have created your dashboard in json format, you will import it in Amazon Managed Grafana:
-1. Select the **squares** on the side menu.<br/>
-    <img alt="Grafana import" src="docs/images/grafana-import.png"  width="20%" height="20%"> <br />
+1. Select the **hamburger** menu on the left pane.<br/>
+1. Choose **Dashboards**.<br/>
+   <img alt="Grafana Dashboard" src="docs/images/grafana-dashboard.png"  width="30%" height="30%"> <br />
+1. Choose **New** on the right side.<br/>
 1. Choose **Import**. <br />
-1. Choose **Upload JSON file**, select the `batch-grafana-dashboard.json` file.
+    <img alt="Grafana import" src="docs/images/grafana-import.png"  width="20%" height="20%"> <br />
+1. Choose **Upload dashboard JSON file**, select the `batch-grafana-dashboard.json` file.
 1. Choose **Load**.
 1. Select the **Athena** and **CloudWatch** data sources your created previously.
    <img alt="Grafana import dashboard" src="docs/images/grafana-dashboard-import.png"  width="60%" height="60%"> <br />
