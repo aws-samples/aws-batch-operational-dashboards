@@ -243,6 +243,9 @@ Resources:
       WorkGroupConfiguration:
         BytesScannedCutoffPerQuery: 1000000000
         EnforceWorkGroupConfiguration: false
+        EngineVersion:
+          EffectiveEngineVersion: 'AUTO'
+          SelectedEngineVersion: 'Athena engine version 3'
         PublishCloudWatchMetricsEnabled: false
         RequesterPaysEnabled: false
 
