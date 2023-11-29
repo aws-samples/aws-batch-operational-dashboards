@@ -205,7 +205,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:292517598671:applications/AthenaDynamoDBConnector
-        SemanticVersion: 2023.15.1
+        SemanticVersion: 2023.46.2
       Parameters:
         AthenaCatalogName: aws-batch-jobs-data
         # WARNING: If set to 'true' encryption for spilled data is disabled.
