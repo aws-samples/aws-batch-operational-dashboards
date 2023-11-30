@@ -464,7 +464,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.7",
+      "pluginVersion": "9.4.7",
       "targets": [
         {
           "datasource": {
@@ -473,9 +473,9 @@
           },
           "expression": "fields @timestamp, TaskId, CpuReserved, CpuUtilized\n| filter @logStream like /AgentTelemetry-/\n| filter TaskId=\"$TaskId\"\n| sort @timestamp desc",
           "id": "",
-          "logGroupNames": [
+          "logGroups": [
             {%- for log in LOG_GROUP %}
-            "{{log}}"{{ ", " if not loop.last else "" }}
+            {{log}}{{", " if not loop.last else "" }}
             {%- endfor %}
           ],
           "namespace": "",
@@ -560,6 +560,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "9.4.7",
       "targets": [
         {
           "datasource": {
@@ -568,9 +569,9 @@
           },
           "expression": "fields @timestamp, TaskId, MemoryReserved, MemoryUtilized\n| filter @logStream like /AgentTelemetry-/\n| filter TaskId=\"$TaskId\"\n| sort @timestamp desc",
           "id": "",
-          "logGroupNames": [
+          "logGroups": [
             {%- for log in LOG_GROUP %}
-            "{{log}}"{{ ", " if not loop.last else "" }}
+            {{log}}{{", " if not loop.last else "" }}
             {%- endfor %}
           ],
           "namespace": "",
