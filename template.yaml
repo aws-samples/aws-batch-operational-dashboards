@@ -322,6 +322,7 @@ Resources:
         - CLOUDWATCH
       GrafanaVersion: "9.4"
       Name: "aws-batch-operation-dashboard"
+      PluginAdminEnabled: true
       RoleArn: !Ref GrafanaRole
       PermissionType: SERVICE_MANAGED
 
