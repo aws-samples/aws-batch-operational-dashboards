@@ -55,10 +55,72 @@
                 {
                     "Variable": "$.LastEventType",
                     "StringMatches": "RUNNING",
-                    "Next": "ChoicePlatform"
+                    "Next": "Set VCPU and MEMORY"
                 }
             ],
             "Default": "Success"
+        },
+        "Set VCPU and MEMORY":
+        {
+            "Type": "Choice",
+            "Choices":
+            [
+                {
+                    "And":
+                    [
+                        {
+                            "Variable": "$$.Execution.Input.detail.container.resourceRequirements[1].type",
+                            "StringMatches": "VCPU"
+                        },
+                        {
+                            "Variable": "$$.Execution.Input.detail.container.resourceRequirements[0].type",
+                            "StringMatches": "MEMORY"
+                        }
+                    ],
+                    "Next": "Set VCPU [1] and MEMORY [0]"
+                },
+                {
+                    "And":
+                    [
+                        {
+                            "Variable": "$$.Execution.Input.detail.container.resourceRequirements[0].type",
+                            "StringMatches": "VCPU"
+                        },
+                        {
+                            "Variable": "$$.Execution.Input.detail.container.resourceRequirements[1].type",
+                            "StringMatches": "MEMORY"
+                        }
+                    ],
+                    "Next": "Set VCPU [0] and MEMORY [1]"
+                }
+            ],
+            "Default": "Fail"
+        },
+        "Set VCPU [0] and MEMORY [1]":
+        {
+            "Type": "Pass",
+            "Next": "ChoicePlatform",
+            "ResultPath": "$.Resource",
+            "Parameters":
+            {
+                "VCPU.$": "$.Detail.container.resourceRequirements[0].value",
+                "MEMORY.$": "$.Detail.container.resourceRequirements[1].value"
+            }
+        },
+        "Set VCPU [1] and MEMORY [0]":
+        {
+            "Type": "Pass",
+            "Next": "ChoicePlatform",
+            "ResultPath": "$.Resource",
+            "Parameters":
+            {
+                "VCPU.$": "$.Detail.container.resourceRequirements[1].value",
+                "MEMORY.$": "$.Detail.container.resourceRequirements[0].value"
+            }
+        },
+        "Fail":
+        {
+            "Type": "Fail"
         },
         "ChoicePlatform":
         {
@@ -97,7 +159,8 @@
                     }
                 }
             },
-            "Next": "DynamoDB PutItem EC2"
+            "Next": "DynamoDB PutItem EC2",
+            "ResultPath": "$.Instance"
         },
         "DynamoDB PutItem EC2":
         {
@@ -134,11 +197,11 @@
                     },
                     "vCPUs":
                     {
-                        "N.$": "$$.Execution.Input.detail.container.resourceRequirements[0].value"
+                        "N.$": "$.Resource.VCPU"
                     },
                     "memory":
                     {
-                        "N.$": "$$.Execution.Input.detail.container.resourceRequirements[1].value"
+                        "N.$": "$.Resource.MEMORY"
                     },
                     "containerInstanceArn":
                     {
@@ -146,19 +209,19 @@
                     },
                     "purchaseOption":
                     {
-                        "S.$": "$.Item.PurchaseOption.S"
+                        "S.$": "$.Instance.Item.PurchaseOption.S"
                     },
                     "instanceType":
                     {
-                        "S.$": "$.Item.InstanceType.S"
+                        "S.$": "$.Instance.Item.InstanceType.S"
                     },
                     "availabilityZone":
                     {
-                        "S.$": "$.Item.AvailabilityZone.S"
+                        "S.$": "$.Instance.Item.AvailabilityZone.S"
                     },
                     "instanceId":
                     {
-                        "S.$": "$.Item.InstanceId.S"
+                        "S.$": "$.Instance.Item.InstanceId.S"
                     },
                     "platform":
                     {
