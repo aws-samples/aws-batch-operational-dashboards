@@ -938,7 +938,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -962,79 +963,28 @@
       },
       "targets": [
         {
-          "alias": "{{'{{InstanceId}}'}}",
           "datasource": {
             "type": "cloudwatch",
             "uid": "${DS_CLOUDWATCH}"
           },
+          "id": "",
+          "region": "default",
+          "logGroups": [],
+          "queryMode": "Metrics",
+          "namespace": "AWS/EC2",
+          "metricName": "EBSWriteBytes",
+          "expression": "",
           "dimensions": {
             "InstanceId": "$instanceid"
           },
-          "expression": "",
-          "id": "",
-          "matchExact": true,
-          "metricEditorMode": 0,
-          "metricName": "EBSWriteBytes",
-          "metricQueryType": 0,
-          "namespace": "AWS/EC2",
+          "statistic": "Average",
           "period": "",
-          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "sqlExpression": "",
+          "matchExact": true,
           "refId": "A",
-          "region": "default",
-          "sql": {
-            "from": {
-              "property": {
-                "name": "AWS/EC2",
-                "type": "string"
-              },
-              "type": "property"
-            },
-            "groupBy": {
-              "expressions": [
-                {
-                  "property": {
-                    "name": "InstanceId",
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "type": "and"
-            },
-            "orderBy": {
-              "name": "AVG",
-              "type": "function"
-            },
-            "orderByDirection": "ASC",
-            "select": {
-              "name": "AVG",
-              "parameters": [
-                {
-                  "name": "EBSWriteBytes",
-                  "type": "functionParameter"
-                }
-              ],
-              "type": "function"
-            },
-            "where": {
-              "expressions": [
-                {
-                  "operator": {
-                    "name": "=",
-                    "value": "$instanceid"
-                  },
-                  "property": {
-                    "name": "InstanceId",
-                    "type": "string"
-                  },
-                  "type": "operator"
-                }
-              ],
-              "type": "and"
-            }
-          },
-          "sqlExpression": "SELECT AVG(EBSWriteBytes) FROM \"AWS/EC2\" WHERE InstanceId = '$instanceid' GROUP BY InstanceId ORDER BY AVG() ASC",
-          "statistic": "Average"
+          "label": "${PROP('Dim.InstanceId')}"
         }
       ],
       "title": "EBS Write Bytes",
@@ -1087,7 +1037,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -1111,79 +1062,28 @@
       },
       "targets": [
         {
-          "alias": "{{'{{InstanceId}}'}}",
           "datasource": {
             "type": "cloudwatch",
             "uid": "${DS_CLOUDWATCH}"
           },
+          "id": "",
+          "region": "default",
+          "logGroups": [],
+          "queryMode": "Metrics",
+          "namespace": "AWS/EC2",
+          "metricName": "EBSReadBytes",
+          "expression": "",
           "dimensions": {
             "InstanceId": "$instanceid"
           },
-          "expression": "",
-          "id": "",
-          "matchExact": true,
-          "metricEditorMode": 0,
-          "metricName": "EBSReadBytes",
-          "metricQueryType": 0,
-          "namespace": "AWS/EC2",
+          "statistic": "Average",
           "period": "",
-          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "sqlExpression": "",
+          "matchExact": true,
           "refId": "A",
-          "region": "default",
-          "sql": {
-            "from": {
-              "property": {
-                "name": "AWS/EC2",
-                "type": "string"
-              },
-              "type": "property"
-            },
-            "groupBy": {
-              "expressions": [
-                {
-                  "property": {
-                    "name": "InstanceId",
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "type": "and"
-            },
-            "orderBy": {
-              "name": "AVG",
-              "type": "function"
-            },
-            "orderByDirection": "ASC",
-            "select": {
-              "name": "AVG",
-              "parameters": [
-                {
-                  "name": "EBSWriteBytes",
-                  "type": "functionParameter"
-                }
-              ],
-              "type": "function"
-            },
-            "where": {
-              "expressions": [
-                {
-                  "operator": {
-                    "name": "=",
-                    "value": "$instanceid"
-                  },
-                  "property": {
-                    "name": "InstanceId",
-                    "type": "string"
-                  },
-                  "type": "operator"
-                }
-              ],
-              "type": "and"
-            }
-          },
-          "sqlExpression": "SELECT AVG(EBSWriteBytes) FROM \"AWS/EC2\" WHERE InstanceId = '$instanceid' GROUP BY InstanceId ORDER BY AVG() ASC",
-          "statistic": "Average"
+          "label": "${PROP('Dim.InstanceId')}"
         }
       ],
       "title": "EBS Read Bytes",
@@ -1260,102 +1160,31 @@
       },
       "targets": [
         {
-          "alias": "{{'{{InstanceId}}'}}",
           "datasource": {
             "type": "cloudwatch",
             "uid": "${DS_CLOUDWATCH}"
           },
+          "id": "",
+          "region": "default",
+          "logGroups": [],
+          "queryMode": "Metrics",
+          "namespace": "AWS/EC2",
+          "metricName": "EBSWriteOps",
+          "expression": "",
           "dimensions": {
             "InstanceId": "$instanceid"
           },
-          "expression": "",
-          "hide": false,
-          "id": "",
-          "matchExact": true,
-          "metricEditorMode": 0,
-          "metricName": "EBSWriteOps",
-          "metricQueryType": 0,
-          "namespace": "AWS/EC2",
+          "statistic": "Average",
           "period": "",
-          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "sqlExpression": "",
+          "matchExact": true,
           "refId": "A",
-          "region": "default",
-          "sql": {
-            "from": {
-              "property": {
-                "name": "AWS/EC2",
-                "type": "string"
-              },
-              "type": "property"
-            },
-            "groupBy": {
-              "expressions": [
-                {
-                  "property": {
-                    "name": "InstanceId",
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "type": "and"
-            },
-            "orderBy": {
-              "name": "AVG",
-              "type": "function"
-            },
-            "orderByDirection": "ASC",
-            "select": {
-              "name": "AVG",
-              "parameters": [
-                {
-                  "name": "EBSWriteBytes",
-                  "type": "functionParameter"
-                }
-              ],
-              "type": "function"
-            },
-            "where": {
-              "expressions": [
-                {
-                  "operator": {
-                    "name": "=",
-                    "value": "$instanceid"
-                  },
-                  "property": {
-                    "name": "InstanceId",
-                    "type": "string"
-                  },
-                  "type": "operator"
-                }
-              ],
-              "type": "and"
-            }
-          },
-          "sqlExpression": "SELECT AVG(EBSWriteBytes) FROM \"AWS/EC2\" WHERE InstanceId = '$instanceid' GROUP BY InstanceId ORDER BY AVG() ASC",
-          "statistic": "Average"
+          "label": "${PROP('Dim.InstanceId')}"
         }
       ],
       "title": "EBS Write IOPS",
-      "transformations": [
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "EBS Write IOPS",
-            "binary": {
-              "left": "EBSWriteOps_Average",
-              "operator": "/",
-              "reducer": "sum",
-              "right": "60"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            },
-            "replaceFields": true
-          }
-        }
-      ],
       "type": "timeseries"
     },
     {
@@ -1429,100 +1258,31 @@
       },
       "targets": [
         {
-          "alias": "{{'{{InstanceId}}'}}",
           "datasource": {
             "type": "cloudwatch",
             "uid": "${DS_CLOUDWATCH}"
           },
+          "id": "",
+          "region": "default",
+          "logGroups": [],
+          "queryMode": "Metrics",
+          "namespace": "AWS/EC2",
+          "metricName": "EBSReadOps",
+          "expression": "",
           "dimensions": {
             "InstanceId": "$instanceid"
           },
-          "expression": "",
-          "id": "",
-          "matchExact": true,
-          "metricEditorMode": 0,
-          "metricName": "EBSReadBytes",
-          "metricQueryType": 0,
-          "namespace": "AWS/EC2",
+          "statistic": "Average",
           "period": "",
-          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "sqlExpression": "",
+          "matchExact": true,
           "refId": "A",
-          "region": "default",
-          "sql": {
-            "from": {
-              "property": {
-                "name": "AWS/EC2",
-                "type": "string"
-              },
-              "type": "property"
-            },
-            "groupBy": {
-              "expressions": [
-                {
-                  "property": {
-                    "name": "InstanceId",
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "type": "and"
-            },
-            "orderByDirection": "ASC",
-            "select": {
-              "name": "AVG",
-              "parameters": [
-                {
-                  "name": "EBSReadBytes",
-                  "type": "functionParameter"
-                }
-              ],
-              "type": "function"
-            },
-            "where": {
-              "expressions": [
-                {
-                  "operator": {
-                    "name": "=",
-                    "value": "$instanceid"
-                  },
-                  "property": {
-                    "name": "InstanceId",
-                    "type": "string"
-                  },
-                  "type": "operator"
-                }
-              ],
-              "type": "and"
-            }
-          },
-          "sqlExpression": "SELECT AVG(EBSReadBytes) FROM \"AWS/EC2\" WHERE InstanceId = '$instanceid' GROUP BY InstanceId",
-          "statistic": "Average"
+          "label": "${PROP('Dim.InstanceId')}"
         }
       ],
       "title": "EBS Read IOPS",
-      "transformations": [
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "EBS Read IOPS",
-            "binary": {
-              "left": "EBSReadBytes_Average",
-              "operator": "/",
-              "reducer": "sum",
-              "right": "60"
-            },
-            "mode": "binary",
-            "reduce": {
-              "include": [
-                "EBSReadBytes_Average"
-              ],
-              "reducer": "sum"
-            },
-            "replaceFields": true
-          }
-        }
-      ],
       "type": "timeseries"
     }
   ],
