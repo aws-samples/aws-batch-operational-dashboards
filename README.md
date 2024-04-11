@@ -155,7 +155,16 @@ Use the password from the mail associated with your user name to login.
 
 Once connected as administrator, you will start by settings data sources.
 
-#### 1. Add Amazon CloudWatch Data source
+#### 1. Install Amazon Athena plugin
+Amazon Managed Grafana since version 9.4 comes with Prometheus and Cloudwatch plugin enabled by default. For other plugins such as Amazon Athena, you will need to install them with the following procedure:
+
+1. Select the **hamburger** menu on the left pane.
+1. Expand **Administration**.
+1. Choose **Plugins**.
+1. Search **Amazon Athena**.
+1. Choose **Install**.
+
+#### 2. Add Amazon CloudWatch Data source
 
 1. Select the **hamburger** menu on the left pane.<br/>
 1. Expand **Administration**<br/>
@@ -167,7 +176,7 @@ Once connected as administrator, you will start by settings data sources.
 1. On the **Default Region** menu, choose your **AWS Region**.
 1. Choose **Save & test**.
 
-#### 2. Add Amazon Athena Data source
+#### 3. Add Amazon Athena Data source
 
 Before starting, you will retrieve the S3 bucket name created to store the AWS Batch jobs data through Amazon Athena.
 
@@ -197,7 +206,7 @@ In the Amazon Managed Grafana dashboard:
 1. On the **Output Location** menu, copy paste the bucket value **s3://DOC-EXAMPLE-BUCKET**.
 1. Choose **Save & test**.
 
-#### 3. Create dashboard
+#### 4. Create dashboard
 
 To create a dashboard in Amazon Managed Grafana for AWS Batch, you will start from the template provided in this repository to generate dashboard for your environment.
 
