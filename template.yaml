@@ -398,7 +398,7 @@ Resources:
         - 'ATHENA'
       AdditionalSchemaElements:
         - 'RESOURCES'
-#        - 'SPLIT_COST_ALLOCATION_DATA'
+        - 'SPLIT_COST_ALLOCATION_DATA'
       Compression: 'Parquet'
       Format: 'Parquet'
       RefreshClosedReports: True
