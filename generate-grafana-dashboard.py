@@ -51,8 +51,8 @@ def container_insights_status(cluster_arn):
     return ci_state
 
 
-def write_file(data):
-    f = open('batch-grafana-dashboard.json', 'w')
+def write_file(filename, data):
+    f = open(filename, 'w')
     f.write(data)
     f.close()
 
@@ -82,7 +82,15 @@ def main():
     template = jinja2.Template(data)
     out = template.render(TABLE=arg.table.lower(), LOG_GROUP=logs)
 
-    write_file(out)
+    write_file('batch-grafana-dashboard.json', out)
+
+    f = open('batch-grafana-cost-dashboard.json')
+    data = f.read()
+    f.close()
+    template = jinja2.Template(data)
+    out = template.render(TABLE=arg.table.lower())
+
+    write_file('batch-grafana-cost.json', out)
 
 
 if __name__ == '__main__':
