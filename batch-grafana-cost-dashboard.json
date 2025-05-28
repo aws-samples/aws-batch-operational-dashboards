@@ -468,7 +468,7 @@
             "region": "__default"
           },
           "format": 1,
-          "rawSQL": "select $__column from $__table;",
+          "rawSQL": "SELECT DISTINCT $__column FROM $__table WHERE COALESCE($__column, '') <> '';",
           "table": "awsbatchcostreport"
         },
         "refresh": 1,
