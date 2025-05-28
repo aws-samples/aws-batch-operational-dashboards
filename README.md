@@ -176,7 +176,7 @@ Amazon Managed Grafana since version 9.4 comes with Prometheus and Cloudwatch pl
 1. On the **Default Region** menu, choose your **AWS Region**.
 1. Choose **Save & test**.
 
-#### 3. Add Amazon Athena Data source
+#### 3. Add Amazon Athena Data source for Job metrics
 
 Before starting, you will retrieve the S3 bucket name created to store the AWS Batch jobs data through Amazon Athena.
 
@@ -206,7 +206,39 @@ In the Amazon Managed Grafana dashboard:
 1. On the **Output Location** menu, copy paste the bucket value **s3://DOC-EXAMPLE-BUCKET**.
 1. Choose **Save & test**.
 
-#### 4. Create dashboard
+
+#### 4. Add Amazon Athena Data source for Cost
+
+Before starting, you will retrieve the S3 bucket name created to store the AWS Batch jobs data through Amazon Athena.
+
+In a terminal:
+
+```bash
+sam list stack-outputs --stack-name ${BATCH_DASHBOARD_NAME} \
+    --output json | \
+    jq -r '.[] | select(.OutputKey=="AthenaSpillBucket") | .OutputValue'
+```
+
+Copy the output that you will use in the setup of Amazon Athena data source in Amazon Managed Grafana.
+
+In the Amazon Managed Grafana dashboard:
+
+1. Select the **hamburger** menu on the left pane.<br/>
+1. Expand **Administration**<br/>
+   <img alt="Grafana Data sources" src="docs/images/grafana-data-sources.png"  width="30%" height="30%"> <br />
+1. Choose **Data sources**.
+1. Choose **Add new data source**.
+1. Choose **Amazon Athena**.<br />
+   <img alt="Grafana athena" src="docs/images/grafana-athena-cost.png"  width="50%" height="50%"> <br />
+1. For **Name**, enter your **Amazon Athena Cost Data**.
+1. On the **Default Region** menu, choose your **AWS Region**.
+1. On the **Data source** menu, choose **AwsDataCatalog**.
+1. On the **Database** menu, choose **athenacurcfn_a_w_s_batch_cost_report**.
+1. On the **Workgroup** menu, choose **primary**.
+1. On the **Output Location** menu, copy paste the bucket value **s3://DOC-EXAMPLE-BUCKET**.
+1. Choose **Save & test**.
+
+#### 5. Create AWS Batch job metrics dashboard
 
 To create a dashboard in Amazon Managed Grafana for AWS Batch, you will start from the template provided in this repository to generate dashboard for your environment.
 
@@ -239,6 +271,26 @@ Once you have created your dashboard in json format, you will import it in Amazo
 You will be redirected to the dashboard you imported.
 Once you will have your first AWS Batch jobs running.
 You will be able to see the data associated with it in the dashboard.
+
+#### 6. Create AWS Batch compute cost dashboard
+
+Similar to step 3, you will import an template dashboard in Amazon Managed Grafana for AWS Batch that covers Amazon EC2 compute cost.
+You can see an example below.
+<img alt="Grafana AWS Batch Dashboard" src="docs/images/grafana-batch-cost-dashboard.png"  width="100%" height="70%"> <br />
+
+To import the dashboard in Amazon Managed Grafana:
+1. Select the **squares** on the side menu.<br/>
+    <img alt="Grafana import" src="docs/images/grafana-import.png"  width="20%" height="20%"> <br />
+1. Choose **Import**. <br />
+1. Choose **Upload JSON file**, select the `batch-grafana-cost-dashboard.json` file.
+1. Choose **Load**.
+1. Select the **Athena** and **CloudWatch** data sources your created previously.
+   <img alt="Grafana import dashboard" src="docs/images/grafana-dashboard-import-cost.png"  width="60%" height="60%"> <br />
+1. Choose **Import**.
+
+You will be redirected to the dashboard you imported.
+AWS Cost and Usage report takes 24 hours to be populated.
+Split cost data will be able for AWS Batch for jobs that are executed after this deployment.
 
 ## Clean up
 To delete the SAM application deployment, you can use the terminal and enter:
