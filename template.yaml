@@ -205,7 +205,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:292517598671:applications/AthenaDynamoDBConnector
-        SemanticVersion: 2023.46.2
+        SemanticVersion: 2025.15.1
       Parameters:
         AthenaCatalogName: aws-batch-jobs-data
         # WARNING: If set to 'true' encryption for spilled data is disabled.
@@ -275,6 +275,7 @@ Resources:
               - athena:StopQueryExecution
             Resource:
               - !Join [ '', ['arn:aws:athena:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':workgroup/', !Ref GrafanaWorkGroup ]]
+              - !Join [ '', ['arn:aws:athena:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':workgroup/primary' ]]
           - Effect: Allow
             Action:
               - s3:GetBucketLocation
@@ -532,41 +533,44 @@ Resources:
     DependsOn: AWSCURCrawler
     Properties:
       Code:
-        ZipFile: >
-          const AWS = require('aws-sdk');
+        ZipFile: |
+          // AWS SDK v3 for Glue
+          const { GlueClient, StartCrawlerCommand } = require('@aws-sdk/client-glue');
           const response = require('./cfn-response');
           exports.handler = function(event, context, callback) {
             if (event.RequestType === 'Delete') {
-              response.send(event, context, response.SUCCESS);
+            response.send(event, context, response.SUCCESS);
             } else {
-              const glue = new AWS.Glue();
-              glue.startCrawler({ Name: 'AWSCURCrawler-AWSBatchCostReport' }, function(err, data) {
-                if (err) {
-                  const responseData = JSON.parse(this.httpResponse.body);
-                  if (responseData['__type'] == 'CrawlerRunningException') {
-                    callback(null, responseData.Message);
-                  } else {
-                    const responseString = JSON.stringify(responseData);
-                    if (event.ResponseURL) {
-                      response.send(event, context, response.FAILED,{ msg: responseString });
-                    } else {
-                      callback(responseString);
-                    }
-                  }
+            // Create Glue client using SDK v3
+             const glue = new GlueClient();
+              // Create command for starting crawler
+              const command = new StartCrawlerCommand({ Name: 'AWSCURCrawler-AWSBatchCostReport' });
+    
+             // Send the command
+              glue.send(command).then(data => {
+                if (event.ResponseURL) {
+                  response.send(event, context, response.SUCCESS);
+                } else {
+                  callback(null, response.SUCCESS);
                 }
-                else {
+             }).catch(err => {
+                const responseData = err;
+                if (err.name === 'CrawlerRunningException') {
+                  callback(null, err.message);
+               } else {
+                  const responseString = JSON.stringify(responseData);
                   if (event.ResponseURL) {
-                    response.send(event, context, response.SUCCESS);
-                  } else {
-                    callback(null, response.SUCCESS);
-                  }
+                    response.send(event, context, response.FAILED,{ msg: responseString });
+                 } else {
+                    callback(responseString);
+                 }
                 }
               });
             }
           };
       Handler: 'index.handler'
       Timeout: 30
-      Runtime: nodejs16.x
+      Runtime: nodejs22.x
       ReservedConcurrentExecutions: 1
       Role: !GetAtt AWSCURCrawlerLambdaExecutor.Arn
 
@@ -625,20 +629,21 @@ Resources:
     - AWSS3CURLambdaExecutor
     Properties:
       Code:
-        ZipFile: >
-          const AWS = require('aws-sdk');
+        ZipFile: |
+          // Add S3 client import
+          const { S3Client, PutBucketNotificationConfigurationCommand } = require('@aws-sdk/client-s3');
           const response = require('./cfn-response');
           exports.handler = function(event, context, callback) {
-            const s3 = new AWS.S3();
+            const s3Client = new S3Client();
             const putConfigRequest = function(notificationConfiguration) {
               return new Promise(function(resolve, reject) {
-                s3.putBucketNotificationConfiguration({
+                const command = new PutBucketNotificationConfigurationCommand({
                   Bucket: event.ResourceProperties.BucketName,
                   NotificationConfiguration: notificationConfiguration
-                }, function(err, data) {
-                  if (err) reject({ msg: this.httpResponse.body.toString(), error: err, data: data });
-                  else resolve(data);
                 });
+                s3Client.send(command)
+                  .then(data => resolve(data))
+                  .catch(err => reject({ msg: err.message, error: err, data: null }));
               });
             };
             const newNotificationConfig = {};
@@ -660,7 +665,7 @@ Resources:
           };
       Handler: 'index.handler'
       Timeout: 30
-      Runtime: nodejs16.x
+      Runtime: nodejs22.x
       ReservedConcurrentExecutions: 1
       Role: !GetAtt AWSS3CURLambdaExecutor.Arn
 
