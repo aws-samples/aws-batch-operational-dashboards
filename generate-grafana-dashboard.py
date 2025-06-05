@@ -84,13 +84,13 @@ def main():
 
     write_file('batch-grafana-dashboard.json', out)
 
-    f = open('batch-grafana-cost-dashboard.json')
+    f = open('batch-grafana-cost-dashboard-template.json')
     data = f.read()
     f.close()
     template = jinja2.Template(data)
     out = template.render(TABLE=arg.table.lower())
 
-    write_file('batch-grafana-cost.json', out)
+    write_file('batch-grafana-cost-dashboard.json', out)
 
 
 if __name__ == '__main__':

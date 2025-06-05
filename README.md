@@ -282,7 +282,7 @@ To import the dashboard in Amazon Managed Grafana:
 1. Select the **squares** on the side menu.<br/>
     <img alt="Grafana import" src="docs/images/grafana-import.png"  width="20%" height="20%"> <br />
 1. Choose **Import**. <br />
-1. Choose **Upload JSON file**, select the `batch-grafana-cost.json` file.
+1. Choose **Upload JSON file**, select the `batch-grafana-cost-dashboard.json` file.
 1. Choose **Load**.
 1. Select the **Athena** and **CloudWatch** data sources your created previously.
    <img alt="Grafana import dashboard" src="docs/images/grafana-dashboard-import-cost.png"  width="60%" height="60%"> <br />
