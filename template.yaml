@@ -541,7 +541,7 @@ Resources:
             if (event.RequestType === 'Delete') {
             response.send(event, context, response.SUCCESS);
             } else {
-            // Create Glue client using SDK v3
+              // Create Glue client using SDK v3
              const glue = new GlueClient();
               // Create command for starting crawler
               const command = new StartCrawlerCommand({ Name: 'AWSCURCrawler-AWSBatchCostReport' });
