@@ -539,14 +539,14 @@ Resources:
           const response = require('./cfn-response');
           exports.handler = function(event, context, callback) {
             if (event.RequestType === 'Delete') {
-            response.send(event, context, response.SUCCESS);
+              response.send(event, context, response.SUCCESS);
             } else {
               // Create Glue client using SDK v3
-             const glue = new GlueClient();
+              const glue = new GlueClient();
               // Create command for starting crawler
               const command = new StartCrawlerCommand({ Name: 'AWSCURCrawler-AWSBatchCostReport' });
     
-             // Send the command
+              // Send the command
               glue.send(command).then(data => {
                 if (event.ResponseURL) {
                   response.send(event, context, response.SUCCESS);
